@@ -4,7 +4,9 @@
   "description": "mern application for web developer",
   "main": "server.js",
   "scripts": {
-    "start": "npx tsc && node dist/server.js"
+    "server": "npx tsc && node dist/server.js",
+    "client": "npm run start --prefix client",
+    "dev": "npm run client && npm run server"
   },
   "author": "Michael Woo",
   "license": "MIT",

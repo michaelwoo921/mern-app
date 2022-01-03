@@ -28,10 +28,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/posts', postRouter);
 app.use('/api/profile', profileRouter);
 
-app.get('/', (req, res) => {
-  console.log(Object.keys(req));
-  res.status(200).send('API running');
-});
+app.use(express.static('client/build'));
 
 const PORT = process.env.PORT || 5000;
 
