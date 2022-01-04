@@ -1,6 +1,8 @@
 import React, { SyntheticEvent, useState } from 'react';
-import axios from 'axios';
+import { login } from '../../store/actions/auth';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import Dashboard from '../dashboard/Dashboard';
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -8,6 +10,10 @@ function Login() {
     password: '',
   });
   const { email, password } = formData;
+  const isAuthenticated = useSelector(
+    (state: any) => state.auth.isAuthenticated
+  );
+  const dispatch = useDispatch();
 
   function onChange(e: SyntheticEvent) {
     setFormData({
@@ -19,20 +25,11 @@ function Login() {
 
   async function onSubmit(e: any) {
     e.preventDefault();
-    console.log(formData);
+    dispatch(login(email, password));
+  }
 
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-      const body = JSON.stringify({ email, password });
-      const res = await axios.post('/api/auth', body, config);
-      console.log(res.data);
-    } catch (err: any) {
-      console.log(err.response.data);
-    }
+  if (isAuthenticated) {
+    return <Dashboard />;
   }
 
   return (
