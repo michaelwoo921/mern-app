@@ -11,7 +11,7 @@ function Navbar() {
   const AuthLinks = () => (
     <ul>
       <li>
-        <Link to="/profiles">Developers</Link>
+        <Link to="/profile">Developers</Link>
       </li>
       <li>
         <Link to="/posts">Posts</Link>
@@ -33,7 +33,7 @@ function Navbar() {
   const guestLinks = () => (
     <ul>
       <li>
-        <Link to="/profiles">Developers</Link>
+        <Link to="/profile">Developers</Link>
       </li>
       <li>
         <Link to="/register">Register</Link>

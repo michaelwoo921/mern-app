@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import Dashboard from '../dashboard/Dashboard';
+import { loadUser } from '../../store/actions/auth';
 
 function Landing() {
+  const isAuthenticated = useSelector(
+    (state: any) => state.auth.isAuthenticated
+  );
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(loadUser());
+  }, [dispatch]);
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
   return (
     <section className="landing">
       <div className="dark-overlay">

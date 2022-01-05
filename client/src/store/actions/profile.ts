@@ -35,12 +35,13 @@ export const getCurrentProfile = () => async (dispatch: any) => {
 export const getProfiles = () => async (dispatch: any) => {
   dispatch({ type: CLEAR_PROFILE });
   try {
-    const res = await api.get('/profiles');
+    const res = await api.get('/profile');
     dispatch({
       type: GET_PROFILES,
       payload: res.data,
     });
   } catch (err: any) {
+    console.log(err);
     dispatch({
       type: PROFILE_ERROR,
       payload: {
