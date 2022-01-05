@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Experience from './Experience';
 import Education from './Education';
+import DashboardActions from './DashboardActions';
 import { Link } from 'react-router-dom';
 import { getCurrentProfile, deleteAccount } from '../../store/actions/profile';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,6 +23,7 @@ function Dashboard() {
       </p>
       {profile !== null ? (
         <>
+          <DashboardActions />
           <Experience experience={profile.experience} />
           <Education education={profile.education} />
           <div className="my-2">
