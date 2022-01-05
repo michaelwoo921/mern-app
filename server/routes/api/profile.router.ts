@@ -4,59 +4,71 @@ import { auth } from '../../middleware/auth';
 import { User } from '../../models/User';
 import { Profile } from '../../models/Profile';
 import { checkObjectId } from '../../middleware/checkObjectId';
+import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
 
 // @route POST /api/profile
 // @desc   create/update user profile
 // @access Private
-router.post('/', auth, async (req: any, res) => {
-  // get user id from req.user
+router.post(
+  '/',
+  body('status', 'Status is required').notEmpty(),
+  body('skills', 'Skills is required').notEmpty(),
+  auth,
+  async (req: any, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-  // get profile from req.body
-  const {
-    website,
-    skills,
-    youtube,
-    twitter,
-    instagram,
-    facebook,
-    linkedin,
-    ...rest
-  } = req.body;
+    // get user id from req.user
 
-  // create and update profile
-  const profileField = {
-    user: req.user.id,
-    website,
-    skills: Array.isArray(skills)
-      ? skills
-      : skills.split(',').map((skill: string) => skill.trim()),
-    ...rest,
-  };
+    // get profile from req.body
+    const {
+      website,
+      skills,
+      youtube,
+      twitter,
+      instagram,
+      facebook,
+      linkedin,
+      ...rest
+    } = req.body;
 
-  const socialFields = { youtube, twitter, instagram, facebook, linkedin };
-  profileField.social = socialFields;
+    // create and update profile
+    const profileField = {
+      user: req.user.id,
+      website,
+      skills: Array.isArray(skills)
+        ? skills
+        : skills.split(',').map((skill: string) => skill.trim()),
+      ...rest,
+    };
 
-  try {
-    const profile = await Profile.findOneAndUpdate(
-      { user: req.user.id },
-      {
-        $set: profileField,
-      },
-      {
-        new: true,
-        upsert: true,
-      }
-    );
+    const socialFields = { youtube, twitter, instagram, facebook, linkedin };
+    profileField.social = socialFields;
 
-    // return profile
-    res.json(profile);
-  } catch (err: any) {
-    console.error(err.message);
-    res.status(500).send('server error');
+    try {
+      const profile = await Profile.findOneAndUpdate(
+        { user: req.user.id },
+        {
+          $set: profileField,
+        },
+        {
+          new: true,
+          upsert: true,
+        }
+      );
+
+      // return profile
+      res.json(profile);
+    } catch (err: any) {
+      console.error(err.message);
+      res.status(500).send('server error');
+    }
   }
-});
+);
 // @route GET /api/profile
 // @desc   get all user profiles
 // @access Public
@@ -138,22 +150,35 @@ router.get('/user/:id', checkObjectId('id'), async (req, res) => {
 // @desc   Add profile experience
 // @access Private
 
-router.put('/experience', auth, async (req: any, res) => {
-  // get experience from body
-  const experience = req.body;
+router.put(
+  '/experience',
+  body('title', 'Title is required').notEmpty(),
+  body('company', 'Company is required').notEmpty(),
+  body('from', 'from date is required and needs to be from the past')
+    .notEmpty()
+    .custom((value, { req }: any) =>
+      req.body.to ? value < req.bodt.to : true
+    ),
+  auth,
+  async (req: any, res) => {
+    const errors = validationResult(req);
+    return res.status(400).json({ errors: errors.array() });
+    // get experience from body
+    const experience = req.body;
 
-  try {
-    // get profile of authenticated user req.user.id
-    const newProfile = await Profile.findOne({ user: req.user.id });
-    newProfile.experience.unshift(experience);
-    const profile = await newProfile.save();
-    // add experience to profile and return profile
-    res.json(profile);
-  } catch (err: any) {
-    console.error(err.message);
-    res.status(500).send('server error');
+    try {
+      // get profile of authenticated user req.user.id
+      const newProfile = await Profile.findOne({ user: req.user.id });
+      newProfile.experience.unshift(experience);
+      const profile = await newProfile.save();
+      // add experience to profile and return profile
+      res.json(profile);
+    } catch (err: any) {
+      console.error(err.message);
+      res.status(500).send('server error');
+    }
   }
-});
+);
 
 // @route DELETE /api/profile/experience/:exp_id
 // @desc   Delete profile experience by exp_id
@@ -178,23 +203,37 @@ router.delete('/experience/:exp_id', auth, async (req: any, res) => {
 // @desc   Add profile education
 // @access Private
 
-router.put('/education', auth, async (req: any, res) => {
-  // get education from body
-  const education = req.body;
+router.put(
+  '/education',
+  auth,
+  body('school', 'School is required').notEmpty(),
+  body('degree', 'Degree is required').notEmpty(),
+  body('fieldofstudy', 'Field of Study is required').notEmpty(),
+  body('from', 'from date is required and needs to be from the past')
+    .notEmpty()
+    .custom((value, { req }: any) =>
+      req.body.to ? value < req.bodt.to : true
+    ),
+  async (req: any, res) => {
+    const errors = validationResult(req);
+    return res.status(400).json({ errors: errors.array() });
+    // get education from body
+    const education = req.body;
 
-  try {
-    // get profile of authenticated user req.user.id
-    console.log(req.body);
-    const newProfile = await Profile.findOne({ user: req.user.id });
-    newProfile.education.unshift(education);
-    const profile = await newProfile.save();
-    // add education to profile and return profile
-    res.json(profile);
-  } catch (err: any) {
-    console.error(err.message);
-    res.status(500).send('server error');
+    try {
+      // get profile of authenticated user req.user.id
+      console.log(req.body);
+      const newProfile = await Profile.findOne({ user: req.user.id });
+      newProfile.education.unshift(education);
+      const profile = await newProfile.save();
+      // add education to profile and return profile
+      res.json(profile);
+    } catch (err: any) {
+      console.error(err.message);
+      res.status(500).send('server error');
+    }
   }
-});
+);
 
 // @route DELETE /api/profile/education/:edu_id
 // @desc   Delete profile education by exp_id

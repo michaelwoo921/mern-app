@@ -3,32 +3,42 @@ import { Post } from '../../models/Post';
 import { User } from '../../models/User';
 import { auth } from '../../middleware/auth';
 import { checkObjectId } from '../../middleware/checkObjectId';
+import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
 
 // @route POST /api/posts
 // @desc   create a post
 // @access Private
-router.post('/', auth, async (req: any, res) => {
-  // get post from req.body
-  // get user id from req.user then get User
-  try {
-    const user = await User.findById(req.user.id);
-    const newPost = new Post({
-      user: req.user.id,
-      text: req.body.text,
-      name: user.name,
-      avatar: user.avatar,
-    });
-    const post = await newPost.save();
-    res.json(post);
-  } catch (err: any) {
-    console.error(err.message);
-    res.status(500).send('server error');
-  }
+router.post(
+  '/',
+  body('text', 'Text is required').notEmpty(),
+  auth,
+  async (req: any, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+    }
+    // get post from req.body
+    // get user id from req.user then get User
+    try {
+      const user = await User.findById(req.user.id);
+      const newPost = new Post({
+        user: req.user.id,
+        text: req.body.text,
+        name: user.name,
+        avatar: user.avatar,
+      });
+      const post = await newPost.save();
+      res.json(post);
+    } catch (err: any) {
+      console.error(err.message);
+      res.status(500).send('server error');
+    }
 
-  //create post and return post
-});
+    //create post and return post
+  }
+);
 
 // @route GET /api/posts
 // @desc   get all posts
@@ -139,7 +149,12 @@ router.post(
   '/:id/comment',
   auth,
   checkObjectId('id'),
+  body('text', 'Text is required').notEmpty(),
   async (req: any, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+    }
     try {
       // get post with params.id and user with user.id
       const post = await Post.findById(req.params.id);
