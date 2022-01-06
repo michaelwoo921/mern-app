@@ -21,7 +21,7 @@ function ProfileItem({ profile }: any) {
         <p className="my-1">
           {location} {location && <span> at {location}</span>}
         </p>
-        <Link to={`profile/${_id}`} className="btn btn-primary">
+        <Link to={`/profile/${_id}`} className="btn btn-primary">
           View Profile
         </Link>
       </div>
